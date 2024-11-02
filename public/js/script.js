@@ -19,51 +19,98 @@ async function carregarTarefas() {
     });
 }
 
+
 async function incluirTarefa() {
-    const nome = prompt('Nome da Tarefa:');
-    const custo = parseFloat(prompt('Custo (R$):'));
-    const data_limite = prompt('Data Limite (YYYY-MM-DD):');
+    try {
+        const nome = prompt('Nome da Tarefa:');
+        if (!nome) throw new Error('Nome da tarefa não pode ser vazio.');
 
-    await fetch('/tarefas', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ nome, custo, data_limite }),
-    });
+        const custo = parseFloat(prompt('Custo (R$):'));
+        if (isNaN(custo)) throw new Error('Custo deve ser um número válido.');
 
-    carregarTarefas();
+        const data_limite = prompt('Data Limite (YYYY-MM-DD):');
+        if (!data_limite || isNaN(Date.parse(data_limite))) throw new Error('Data limite inválida.');
+
+        const response = await fetch('/tarefas', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ nome, custo, data_limite }),
+        });
+
+        if (!response.ok) throw new Error('Erro ao incluir a tarefa.');
+
+        carregarTarefas();
+    } catch (error) {
+        console.error('Erro ao incluir tarefa:', error);
+        alert(`Erro: ${error.message}`);
+    }
 }
 
 async function excluirTarefa(id) {
-    if (confirm('Tem certeza que deseja excluir esta tarefa?')) {
-        await fetch(`/tarefas/${id}`, {
-            method: 'DELETE',
-        });
-        carregarTarefas();
+    try {
+        if (confirm('Tem certeza que deseja excluir esta tarefa?')) {
+            const response = await fetch(`/tarefas/${id}`, {
+                method: 'DELETE',
+            });
+
+            if (!response.ok) throw new Error('Erro ao excluir a tarefa.');
+
+            carregarTarefas();
+        }
+    } catch (error) {
+        console.error('Erro ao excluir tarefa:', error);
+        alert('Não foi possível excluir a tarefa. Tente novamente.');
     }
 }
 
 async function editarTarefa(id) {
-    const tarefa = await fetch(`/tarefas/${id}`);
-    const data = await tarefa.json();
+    try {
+        const response = await fetch(`/tarefas/${id}`);
+        if (!response.ok) throw new Error('Erro ao carregar detalhes da tarefa.');
 
-    const novoNome = prompt('Novo Nome da Tarefa:', data.nome);
-    const novoCusto = parseFloat(prompt('Novo Custo (R$):', data.custo));
-    const novaDataLimite = prompt('Nova Data Limite (YYYY-MM-DD):', data.data_limite);
+        const data = await response.json();
 
-    await fetch(`/tarefas/${id}`, {
-        method: 'PUT',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ nome: novoNome, custo: novoCusto, data_limite: novaDataLimite }),
-    });
+        const novoNome = prompt('Novo Nome da Tarefa:', data.nome);
+        if (!novoNome) throw new Error('Nome da tarefa não pode ser vazio.');
 
-    carregarTarefas();
+        const novoCusto = parseFloat(prompt('Novo Custo (R$):', data.custo));
+        if (isNaN(novoCusto)) throw new Error('Custo deve ser um número válido.');
+
+        const novaDataLimite = prompt('Nova Data Limite (YYYY-MM-DD):', data.data_limite);
+        if (!novaDataLimite || isNaN(Date.parse(novaDataLimite))) throw new Error('Data limite inválida.');
+
+        const updateResponse = await fetch(`/tarefas/${id}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ nome: novoNome, custo: novoCusto, data_limite: novaDataLimite }),
+        });
+
+        if (!updateResponse.ok) throw new Error('Erro ao atualizar a tarefa.');
+
+        carregarTarefas();
+    } catch (error) {
+        console.error('Erro ao editar tarefa:', error);
+        alert(`Erro: ${error.message}`);
+    }
 }
 
+// Adiciona o evento de clique para o botão de incluir tarefa
 document.getElementById('incluir-tarefa').addEventListener('click', incluirTarefa);
 
 // Carrega as tarefas ao iniciar a página
-carregarTarefas();
+
+document.addEventListener('DOMContentLoaded', () => {
+    carregarTarefas(); 
+});
+
+
+
+document.getElementById('incluir-tarefa').addEventListener('click', async (e) => {
+    e.preventDefault(); // Impede o comportamento padrão do formulário
+    await incluirTarefa(); // Chama a função para incluir a tarefa
+    carregarTarefas(); // Atualiza a lista de tarefas
+});

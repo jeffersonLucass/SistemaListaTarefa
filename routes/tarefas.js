@@ -14,7 +14,9 @@ router.post('/', async (req, res) => {
     const ordem_apresentacao = await Tarefa.count() + 1; // Próximo número
     try {
         const novaTarefa = await Tarefa.create({ nome, custo, data_limite, ordem_apresentacao });
-        res.status(201).json(novaTarefa);
+        
+        // Redirecionar para a lista de tarefas
+        res.redirect('/'); // Ajuste para o caminho correto se necessário
     } catch (error) {
         res.status(400).json({ error: error.message });
     }

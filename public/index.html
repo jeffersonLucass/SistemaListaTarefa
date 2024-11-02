@@ -2,25 +2,27 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lista de Tarefas</title>
-    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="/css/styles.css">
+    <script src="/js/script.js" defer></script>
 </head>
 <body>
     <h1>Lista de Tarefas</h1>
-    <table id="tarefas-table">
+    <table id="tabela-tarefas">
         <thead>
             <tr>
-                <th>Nome da Tarefa</th>
+                <th>Nome</th>
                 <th>Custo (R$)</th>
                 <th>Data Limite</th>
                 <th>Ações</th>
             </tr>
         </thead>
         <tbody>
-            <!-- Tarefas serão inseridas aqui -->
+            <!-- As tarefas serão inseridas aqui dinamicamente via JavaScript -->
         </tbody>
     </table>
-    <button id="incluir-tarefa">Incluir Tarefa</button>
-    <script src="js/script.js"></script>
+    <a href="/form.html">Adicionar Nova Tarefa</a>
+
 </body>
 </html>
