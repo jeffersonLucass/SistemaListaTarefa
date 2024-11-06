@@ -1,14 +1,20 @@
 async function carregarTarefas() {
     const response = await fetch('/tarefas');
     const tarefas = await response.json();
-    const tbody = document.querySelector('#tarefas-table tbody');
+    const tbody = document.querySelector('#tabela-tarefas tbody');
     tbody.innerHTML = ''; // Limpa o conteúdo anterior
-
     tarefas.forEach(tarefa => {
+        const custoFormatado = isNaN(tarefa.custo) ? 0 : parseFloat(tarefa.custo).toFixed(2); // Garantir que 'custo' é um número
         const tr = document.createElement('tr');
+
+        // Muda a cor da linha inteira se o custo for igual ou superior a 1000
+        if (parseFloat(tarefa.custo) >= 1000) {
+            tr.style.backgroundColor = 'yellow';
+        }
+
         tr.innerHTML = `
             <td>${tarefa.nome}</td>
-            <td style="background-color: ${tarefa.custo >= 1000 ? 'yellow' : 'white'};">${tarefa.custo.toFixed(2)}</td>
+            <td>${custoFormatado}</td>
             <td>${new Date(tarefa.data_limite).toLocaleDateString()}</td>
             <td>
                 <button onclick="editarTarefa(${tarefa.id})">Editar</button>
@@ -19,34 +25,6 @@ async function carregarTarefas() {
     });
 }
 
-
-async function incluirTarefa() {
-    try {
-        const nome = prompt('Nome da Tarefa:');
-        if (!nome) throw new Error('Nome da tarefa não pode ser vazio.');
-
-        const custo = parseFloat(prompt('Custo (R$):'));
-        if (isNaN(custo)) throw new Error('Custo deve ser um número válido.');
-
-        const data_limite = prompt('Data Limite (YYYY-MM-DD):');
-        if (!data_limite || isNaN(Date.parse(data_limite))) throw new Error('Data limite inválida.');
-
-        const response = await fetch('/tarefas', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ nome, custo, data_limite }),
-        });
-
-        if (!response.ok) throw new Error('Erro ao incluir a tarefa.');
-
-        carregarTarefas();
-    } catch (error) {
-        console.error('Erro ao incluir tarefa:', error);
-        alert(`Erro: ${error.message}`);
-    }
-}
 
 async function excluirTarefa(id) {
     try {
@@ -98,19 +76,7 @@ async function editarTarefa(id) {
     }
 }
 
-// Adiciona o evento de clique para o botão de incluir tarefa
-document.getElementById('incluir-tarefa').addEventListener('click', incluirTarefa);
-
 // Carrega as tarefas ao iniciar a página
-
 document.addEventListener('DOMContentLoaded', () => {
     carregarTarefas(); 
-});
-
-
-
-document.getElementById('incluir-tarefa').addEventListener('click', async (e) => {
-    e.preventDefault(); // Impede o comportamento padrão do formulário
-    await incluirTarefa(); // Chama a função para incluir a tarefa
-    carregarTarefas(); // Atualiza a lista de tarefas
 });

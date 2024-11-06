@@ -23,18 +23,35 @@ router.post('/', async (req, res) => {
 });
 
 // Editar tarefa
+// Atualizar uma tarefa existente pelo ID
 router.put('/:id', async (req, res) => {
-    const { nome, custo, data_limite } = req.body;
     try {
         const tarefa = await Tarefa.findByPk(req.params.id);
-        if (!tarefa) return res.status(404).json({ error: 'Tarefa não encontrada' });
+        if (!tarefa) {
+            return res.status(404).json({ error: 'Tarefa não encontrada' });
+        }
+
+        const { nome, custo, data_limite } = req.body;
         tarefa.nome = nome;
         tarefa.custo = custo;
         tarefa.data_limite = data_limite;
+
         await tarefa.save();
         res.json(tarefa);
     } catch (error) {
-        res.status(400).json({ error: error.message });
+        res.status(500).json({ error: error.message });
+    }
+});
+
+router.get('/:id', async (req, res) => {
+    try {
+        const tarefa = await Tarefa.findByPk(req.params.id);
+        if (!tarefa) {
+            return res.status(404).json({ error: 'Tarefa não encontrada' });
+        }
+        res.json(tarefa);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
     }
 });
 
